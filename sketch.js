@@ -1,75 +1,47 @@
-let handPose;
-let video;
-let hands = [];
-let isDetecting = true; 
-let connections = [];
-
 function preload() {
-  // Load the handPose model
-  handPose = ml5.handPose(modelReady); 
-}
+    handPose = ml5.handPose();
+  }
 
-function modelReady() {
-  console.log('HandPose model loaded!');
-}
+  let video;
 
-function setup() {
-  createCanvas(640, 480);
-  
-//used to access webcam
+  function setup() {
+    createCanvas(640, 480);
+    // Create the video and hide it
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
-  
-  //used to detect hands
-  handPose.detect(video, gotHands);
-
-  //hand keypoint connections
-  connections = handPose.getConnections();
 }
 
-function draw() {
-  image(video, 0, 0, width, height);
+let hands = [];
 
-
+function setup() {
+    // ...
+    video.hide();
+  
+    // Start detecting hands from the webcam video
+    handPose.detectStart(video, gotHands);
+  }
+  
+  // Callback function for when handPose outputs data
+function gotHands(results) {
+    // Save the output to the hands variable
+    hands = results;
+  }
+  
+  function draw() {
+    image(video, 0, 0, width, height);
+  
+      // Draw all the tracked hand points
   for (let i = 0; i < hands.length; i++) {
     let hand = hands[i];
-    
 
     for (let j = 0; j < hand.keypoints.length; j++) {
-      let keypoint = hand.keypoints[j];
-      fill(0, 255, 0);
-      noStroke();
-      circle(keypoint.x, keypoint.y, 10);
-    }
-
-
-    for (let k = 0; k < connections.length; k++) {
-      let [startIdx, endIdx] = connections[k];
-      let start = hand.keypoints[startIdx];
-      let end = hand.keypoints[endIdx];
-      stroke(255, 0, 0);
-      line(start.x, start.y, end.x, end.y);
+        let keypoint = hand.keypoints[j];
+  
+        fill(0, 255, 0);
+        noStroke();
+        circle(keypoint.x, keypoint.y, 10);
+      }
     }
   }
-}
-
-
-function gotHands(results) {
-  hands = results; 
-}
-
-
-function mousePressed() {
-  toggleDetection();
-}
-
-function toggleDetection() {
-  if (isDetecting) {
-    handPose.detectStop(); // Stop handPose 
-    isDetecting = false;
-  } else {
-    handPose.detect(video, gotHands); // Start handPose 
-    isDetecting = true;
-  }
-}
+  
